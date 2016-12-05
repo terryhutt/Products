@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html ng-app="DefaultApp">
+<head>
+    <title>products</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+    <script>
+        angular.module("DefaultApp", [])
+        .constant("productsUrl", "/Products.svc/ProductList/")
+        .controller("DefaultCtrl",
+        function ($scope,$http,productsUrl) {
+
+            $scope.getData = function () {
+                $http.get(productsUrl)
+                .then
+                (
+                    function (result) { $scope.products = result.data; }
+                    ,
+                    function (result) { $scope.statusText = result.statusText; }
+                )
+            };
+
+            $scope.getData();
+        });
+    </script>
+</head>
+<body ng-controller="DefaultCtrl">
+    <div>{{statusText}}</div>
+    <table>
+        <tr ng-repeat="item in products">
+            <td>{{item.ID}}</td>
+            <td>{{item.Name}}</td>
+            <td>{{item.ProductNumber}}</td>
+            <td>{{item.Color}}</td>
+            <td>{{item.Price | currency}}</td>
+        </tr>
+    </table>
+</body>
+</html>
