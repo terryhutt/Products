@@ -8,7 +8,7 @@
         .constant("productsUrl", "/Products.svc/ProductList/")
         .controller("DefaultCtrl",
         function ($scope,$http,productsUrl) {
-
+            $scope.sortColumn = "ID";
             $scope.getData = function () {
                 $http.get(productsUrl)
                 .then
@@ -19,14 +19,39 @@
                 )
             };
 
+            $scope.setSortColumn = function (name) {
+                $scope.sortColumn = name;
+            };
+
+            $scope.getOrderByClass = function (name) {
+                return (name == $scope.sortColumn) ? 'Sorted' : '';
+            };
+
             $scope.getData();
         });
     </script>
+    <style>
+        a {color:black;
+            text-decoration: none;
+        }
+        a:visited {color:black}
+        a.Sorted {text-decoration:underline;}
+        
+    </style>
 </head>
 <body ng-controller="DefaultCtrl">
     <div>{{statusText}}</div>
     <table>
-        <tr ng-repeat="item in products">
+        <thead>
+            <tr>
+                <th><a href="#" ng-click="setSortColumn('ID')" ng-class="getOrderByClass('ID')">ID</a></th>
+                <th><a href="#" ng-click="setSortColumn('Name')" ng-class="getOrderByClass('Name')">Name</a></th>
+                <th><a href="#" ng-click="setSortColumn('ProductNumber')" ng-class="getOrderByClass('ProductNumber')">ProductNumber</a></th>
+                <th><a href="#" ng-click="setSortColumn('Color')" ng-class="getOrderByClass('Color')">Color</a></th>
+                <th><a href="#" ng-click="setSortColumn('Price')" ng-class="getOrderByClass('Price')">Price</a></th>
+            </tr>
+        </thead>
+        <tr ng-repeat="item in products | orderBy:sortColumn">
             <td>{{item.ID}}</td>
             <td>{{item.Name}}</td>
             <td>{{item.ProductNumber}}</td>
