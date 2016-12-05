@@ -14,7 +14,7 @@ namespace Products
     {
         public List<Product> GetProductList() 
         {
-            String SQL = "SELECT ProductID, Name, ProductNumber, Color, ListPrice FROM Production.Product ORDER BY ProductID";
+            String SQL = "SELECT ProductID, Name, ProductNumber, ISNULL(Color,'') AS Color, ListPrice FROM Production.Product ORDER BY ProductID";
             String ConnString = System.Configuration.ConfigurationManager.ConnectionStrings["localhost"].ConnectionString;
             DataTable dt = new DataTable();
 

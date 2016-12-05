@@ -3,13 +3,46 @@
 <head>
     <title>products</title>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
-    <script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+        <script>
         angular.module("DefaultApp", [])
         .constant("productsUrl", "/Products.svc/ProductList/")
+        .filter("searchFilter",
+        function ()
+        {
+            return function(products, searchText, scope)
+            {
+                var results = [];
+                if (!angular.isArray(products) || searchText == "") {
+                    results = products;
+                }
+                else {
+                    for (var i = 0; i < products.length; i++) {
+                        if (products[i].Name.toUpperCase().indexOf(searchText.toUpperCase()) > -1)
+                            results.push(products[i]);
+                    }
+                }
+                
+                if (angular.isArray(results))
+                    scope.resultsCount = results.length;
+                else
+                    scope.resultsCount = 0;
+
+                return results;
+            }
+        })
         .controller("DefaultCtrl",
         function ($scope, $http, productsUrl) {
             $scope.sortColumn = "ID";
             $scope.isLoaded = false;
+            $scope.searchText = "";
+            $scope.resultsCount = 0;
             $scope.getData = function () {
                 $http.get(productsUrl)
                 .then
@@ -30,30 +63,30 @@
             $scope.getOrderByClass = function (name) {
                 return (name == $scope.sortColumn) ? 'Sorted' : '';
             };
-
+            
             $scope.getData();
         });
     </script>
     <style>
-        body {font-family:Tahoma;}
+        body {
+            font-family: Tahoma;
+        }
 
         a {
-            color: black;
-            text-decoration: none;
+            color: black; text-decoration:none;
         }
 
             a:visited {
                 color: black;
             }
 
-            a.Sorted {
-                text-decoration: underline;
-            }
+            a.Sorted {text-decoration:none;}
+            a.Sorted::after {content:" ▲"}
 
         .wrap {
-            position:absolute;
-            top:0px;
-            left:0px;
+            position: absolute;
+            top: 0px;
+            left: 0px;
             display: flex;
             justify-content: center;
             width: 100%;
@@ -68,25 +101,30 @@
             height: 50px;
             border: 2px solid black;
             border-radius: 5pt;
-            padding-top: 20px;
             text-align: center;
-            font-weight:bold;
+            padding-top:15px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body ng-controller="DefaultCtrl">
     <div>{{statusText}}</div>
-    <table>
+    <div class="well panel-head">
+            <span>Search Product Name: </span>
+            <span><input type="text" ng-model="searchText" /></span>
+        <span> {{resultsCount}} of {{products.length}} qualifying</span>
+    </div>
+    <table class="table table-bordered table-hover table-striped table-condensed">
         <thead>
             <tr>
-                <th><a href="#" ng-click="setSortColumn('ID')" ng-class="getOrderByClass('ID')">ID</a></th>
-                <th><a href="#" ng-click="setSortColumn('Name')" ng-class="getOrderByClass('Name')">Name</a></th>
-                <th><a href="#" ng-click="setSortColumn('ProductNumber')" ng-class="getOrderByClass('ProductNumber')">Product Number</a></th>
-                <th><a href="#" ng-click="setSortColumn('Color')" ng-class="getOrderByClass('Color')">Color</a></th>
-                <th><a href="#" ng-click="setSortColumn('Price')" ng-class="getOrderByClass('Price')">Price</a></th>
+                <th width="10%"><a href="#" ng-click="setSortColumn('ID')" ng-class="getOrderByClass('ID')">ID</a></th>
+                <th width="30%"><a href="#" ng-click="setSortColumn('Name')" ng-class="getOrderByClass('Name')">Product Name</a></th>
+                <th width="20%"><a href="#" ng-click="setSortColumn('ProductNumber')" ng-class="getOrderByClass('ProductNumber')">Product Number</a></th>
+                <th width="20%"><a href="#" ng-click="setSortColumn('Color')" ng-class="getOrderByClass('Color')">Color</a></th>
+                <th width="20%"><a href="#" ng-click="setSortColumn('Price')" ng-class="getOrderByClass('Price')">Price</a></th>
             </tr>
         </thead>
-        <tr ng-repeat="item in products | orderBy:sortColumn">
+        <tr ng-repeat="item in products | searchFilter:searchText:this | orderBy:sortColumn">
             <td>{{item.ID}}</td>
             <td>{{item.Name}}</td>
             <td>{{item.ProductNumber}}</td>
